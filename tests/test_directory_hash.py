@@ -2,7 +2,9 @@ import hashlib
 import tempfile
 import unittest
 from pathlib import Path
+
 from dev_utils.directory_hash import directory_hashes
+
 
 class DirectoryHashTests(unittest.TestCase):
     def test_hashes_files_with_relative_paths(self):
@@ -30,6 +32,28 @@ class DirectoryHashTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             self.assertEqual(directory_hashes(directory), {})
 
+    def test_invalid_algorithm_is_rejected_for_empty_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, "unsupported hash algorithm"):
+                directory_hashes(directory, algorithm="not-real")
+
+    def test_exclude_dirs_must_be_names(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(TypeError):
+                directory_hashes(directory, exclude_dirs="build")
+
+    def test_symlink_files_are_skipped(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "target.txt"
+            target.write_text("content", encoding="utf-8")
+            link = root / "link.txt"
+            try:
+                link.symlink_to(target)
+            except (NotImplementedError, OSError):
+                self.skipTest("symlinks are not available on this platform")
+            self.assertEqual(list(directory_hashes(root)), ["target.txt"])
+
     def test_non_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "file"
@@ -42,6 +66,7 @@ class DirectoryHashTests(unittest.TestCase):
             (Path(directory) / "file").write_text("x", encoding="utf-8")
             with self.assertRaises(ValueError):
                 directory_hashes(directory, algorithm="not-real")
+
 
 if __name__ == "__main__":
     unittest.main()
