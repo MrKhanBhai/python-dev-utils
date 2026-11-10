@@ -31,7 +31,7 @@ cd python-dev-utils
 python -m pip install .
 ```
 
-For development (including the test, build, and lint tools):
+For development (including the test, build, and lint tools), first clone the repository and run this from its root directory:
 
 ```bash
 python -m pip install -e ".[dev]"
@@ -110,7 +110,7 @@ This returns a deterministic mapping of relative POSIX paths to individual file 
 | Function | Purpose |
 |---|---|
 | `hash_bytes(data, algorithm="sha256")` | Hash bytes and return a hexadecimal digest |
-| `hash_file(path, algorithm="sha256", chunk_size=65536)` | Stream a file into a hash |
+| `hash_file(file_path, algorithm="sha256", chunk_size=65536)` | Stream a file into a hash |
 | `sha256_file(path)` | Backwards-compatible SHA-256 file helper |
 | `files_are_equal(first, second, chunk_size=65536)` | Compare two files byte-for-byte |
 | `find_duplicate_files(directory, recursive=True)` | Return groups of duplicate file paths |
