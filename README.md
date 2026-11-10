@@ -13,7 +13,8 @@ Small, dependency-free file utilities for Python developers.
 - Hash in-memory `bytes` without creating a temporary file.
 - Compare two files byte-for-byte without reading either file fully into memory.
 - Find duplicate files by size and content hash (read-only; never deletes files).
-- Generate a deterministic per-file hash manifest for a directory tree.
+- Generate, save, load, and verify deterministic JSON manifests for directory trees.
+- Use the same tools from Python or the `dev-utils` command-line interface.
 
 ## Installation
 
@@ -31,79 +32,78 @@ cd python-dev-utils
 python -m pip install .
 ```
 
-For development (including the test, build, and lint tools), first clone the repository and run this from its root directory:
+For development (including test, build, and lint tools), run this from the repository root:
 
 ```bash
 python -m pip install -e ".[dev]"
 ```
 
-> **PyPI note:** The normalized project name `python-dev-utils` is already registered to a different publisher. Confirm the exact PyPI project URL/name before using a `pip install`-from-PyPI command; do not assume this GitHub repository owns that existing PyPI listing.
+> **PyPI note:** The normalized project name `python-dev-utils` is already registered to a different publisher. Confirm the exact PyPI project URL/name before using a PyPI install command; do not assume this repository owns that listing.
 
 ## Quick start
 
-### Hash a file
+### Hash a file or bytes
 
 ```python
-from dev_utils import hash_file, sha256_file
+from dev_utils import hash_bytes, hash_file, sha256_file
 
-# Backwards-compatible SHA-256 helper
-sha256_digest = sha256_file("archive.zip")
-
-# Choose another hashlib algorithm and a custom streaming chunk size
-sha512_digest = hash_file(
-    "archive.zip",
-    algorithm="sha512",
-    chunk_size=128 * 1024,
-)
+sha256_digest = sha256_file("archive.zip")  # Backwards-compatible helper
+sha512_digest = hash_file("archive.zip", algorithm="sha512", chunk_size=128 * 1024)
+memory_digest = hash_bytes(b"hello", algorithm="sha256")
 ```
 
-### Hash bytes
+### Compare files and find duplicates
 
 ```python
-from dev_utils import hash_bytes
-
-digest = hash_bytes(b"hello", algorithm="sha256")
-print(digest)
-```
-
-### Compare two files
-
-```python
-from dev_utils import files_are_equal
+from dev_utils import files_are_equal, find_duplicate_files
 
 if files_are_equal("original.bin", "copy.bin"):
     print("Files contain identical bytes")
+
+for group in find_duplicate_files("./data"):
+    print([str(path) for path in group])
+```
+
+The duplicate finder groups candidates by size before hashing. It is read-only and skips symbolic links.
+
+### Create and verify a directory manifest
+
+```python
+from dev_utils import write_manifest, verify_manifest
+
+# Store the manifest outside the directory being scanned.
+write_manifest("./data", "../data-manifest.json", exclude_dirs=(".git", "__pycache__"))
+
+result = verify_manifest("./data", "../data-manifest.json")
+if any(result.values()):
+    print("Directory differs from the manifest:", result)
 else:
-    print("Files differ")
+    print("Directory matches the manifest")
 ```
 
-### Find duplicate files
+A verification result contains sorted `missing`, `modified`, and `untracked` relative paths. Verification never changes files. The manifest stores per-file digests; it is not a single combined directory digest. Symbolic links are not followed.
 
-```python
-from dev_utils import find_duplicate_files
+## Command-line interface
 
-for duplicate_group in find_duplicate_files("./data"):
-    print("Duplicate group:")
-    for path in duplicate_group:
-        print(f" - {path}")
+Installing the package creates the `dev-utils` command:
+
+```bash
+# Hash a file
+dev-utils hash archive.zip --algorithm sha256
+
+# Compare two files (exit 0 if identical, 1 if different)
+dev-utils compare original.bin copy.bin
+
+# List duplicate groups
+dev-utils duplicates ./data
+dev-utils duplicates ./data --non-recursive
+
+# Create a JSON manifest; keep output outside the scanned directory
+dev-utils manifest ./data ../data-manifest.json --exclude-dir .git
+
+# Verify against a saved manifest (exit 0 if clean, 1 if differences found)
+dev-utils verify ./data ../data-manifest.json
 ```
-
-The duplicate finder first groups candidates by file size, then compares content hashes. It is read-only: it does not delete or modify files. Symbolic links are skipped.
-
-### Hash a directory tree
-
-```python
-from dev_utils import directory_hashes
-
-manifest = directory_hashes(
-    "./data",
-    exclude_dirs=("__pycache__", ".git"),
-)
-for relative_path, digest in manifest.items():
-    print(relative_path, digest)
-```
-
-This returns a deterministic mapping of relative POSIX paths to individual file digests. It does **not** calculate one combined directory digest. Symbolic links are not followed.
 
 ## API reference
 
@@ -114,31 +114,23 @@ This returns a deterministic mapping of relative POSIX paths to individual file 
 | `sha256_file(path)` | Backwards-compatible SHA-256 file helper |
 | `files_are_equal(first, second, chunk_size=65536)` | Compare two files byte-for-byte |
 | `find_duplicate_files(directory, recursive=True)` | Return groups of duplicate file paths |
-| `directory_hashes(directory, algorithm="sha256", exclude_dirs=())` | Return a sorted per-file hash manifest |
+| `directory_hashes(directory, algorithm="sha256", exclude_dirs=())` | Return a sorted per-file hash mapping |
+| `build_manifest(directory, algorithm="sha256", exclude_dirs=())` | Build versioned manifest data |
+| `write_manifest(directory, manifest_path, ...)` | Write a JSON manifest |
+| `load_manifest(manifest_path)` | Load and validate a JSON manifest |
+| `verify_manifest(directory, manifest, include_untracked=True)` | Report missing, modified, and untracked files |
 
-File-system errors are generally propagated to the caller. Invalid hash algorithms and non-positive chunk sizes raise `ValueError`.
+File-system errors are generally propagated to the caller. Unsupported algorithms and non-positive chunk sizes raise `ValueError`.
 
 ## Development
 
-Run the test suite:
-
 ```bash
 python -m unittest discover -s tests -v
-```
-
-Run Ruff:
-
-```bash
 ruff check .
-```
-
-Build the source and wheel distributions:
-
-```bash
 python -m build
 ```
 
-GitHub Actions runs the test suite and lint checks on Python 3.10, 3.11, 3.12, and 3.13, and builds the package on Python 3.12.
+GitHub Actions runs tests and lint checks on Python 3.10, 3.11, 3.12, and 3.13, and builds the package on Python 3.12.
 
 ## Contributing
 
