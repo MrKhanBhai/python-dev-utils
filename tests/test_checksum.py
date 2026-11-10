@@ -9,7 +9,8 @@ class ChecksumTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "sample.txt"
             path.write_bytes(b"hello world")
-            self.assertEqual(sha256_file(path), hashlib.sha256(b"hello world").hexdigest())
+            expected = hashlib.sha256(b"hello world").hexdigest()
+            self.assertEqual(sha256_file(path), expected)
 
     def test_empty_file(self):
         with tempfile.TemporaryDirectory() as directory:
