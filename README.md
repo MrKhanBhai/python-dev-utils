@@ -130,7 +130,7 @@ ruff check .
 python -m build
 ```
 
-GitHub Actions runs tests and lint checks on Python 3.10, 3.11, 3.12, and 3.13, and builds the package on Python 3.12.
+GitHub Actions runs tests, lint checks, coverage reporting, and a CLI smoke test on Python 3.10–3.13 across Ubuntu, Windows, and macOS. It builds the package on Ubuntu with Python 3.12.
 
 ## Contributing
 
