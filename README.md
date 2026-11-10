@@ -5,7 +5,7 @@ Small, dependency-free file utilities for Python developers.
 [![Python versions](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Python:** 3.10+ · **Runtime dependencies:** none · **License:** MIT
+**Python:** 3.10+ · **Runtime dependencies:** none · **Type hints:** PEP 561 · **License:** MIT
 
 ## Features
 
