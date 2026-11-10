@@ -14,4 +14,7 @@ Notable changes to python-dev-utils are documented here.
 
 ## Unreleased
 
-No unreleased changes yet.
+- Harden hash algorithm and directory input validation.
+- Add versioned JSON directory manifests with validation and verification reports.
+- Add the `dev-utils` CLI for hashing, comparison, duplicate discovery, and manifests.
+- Add PEP 561 typing metadata and expand cross-platform CI to Ubuntu, Windows, and macOS.
