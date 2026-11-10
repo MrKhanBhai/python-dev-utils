@@ -5,7 +5,9 @@ from collections import defaultdict
 from pathlib import Path
 from .checksum import PathLike, hash_file
 
-def find_duplicate_files(directory: PathLike, recursive: bool = True) -> list[list[Path]]:
+def find_duplicate_files(
+    directory: PathLike, recursive: bool = True
+) -> list[list[Path]]:
     """Return groups of identical files without deleting or modifying anything.
 
     Files are grouped by size before hashing. Symbolic links are skipped.
