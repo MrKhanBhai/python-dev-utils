@@ -7,7 +7,8 @@ PathLike = Union[str, Path]
 DEFAULT_CHUNK_SIZE = 64 * 1024
 
 def _validate_chunk_size(chunk_size: int) -> None:
-    if not isinstance(chunk_size, int) or isinstance(chunk_size, bool) or chunk_size <= 0:
+    valid_type = isinstance(chunk_size, int) and not isinstance(chunk_size, bool)
+    if not valid_type or chunk_size <= 0:
         raise ValueError("chunk_size must be a positive integer")
 
 def hash_bytes(data: bytes, algorithm: str = "sha256") -> str:
