@@ -17,11 +17,15 @@ def directory_hashes(directory: PathLike, algorithm: str = "sha256",
         raise NotADirectoryError(str(root))
     result: dict[str, str] = {}
     for current, dirs, names in os.walk(root, followlinks=False):
-        dirs[:] = sorted(name for name in dirs
-                         if name not in exclude_dirs and not (Path(current) / name).is_symlink())
+        dirs[:] = sorted(
+            name for name in dirs
+            if name not in exclude_dirs
+            and not (Path(current) / name).is_symlink()
+        )
         for name in sorted(names):
             path = Path(current) / name
             if path.is_symlink() or not path.is_file():
                 continue
-            result[path.relative_to(root).as_posix()] = hash_file(path, algorithm=algorithm)
+            relative = path.relative_to(root).as_posix()
+            result[relative] = hash_file(path, algorithm=algorithm)
     return dict(sorted(result.items()))
