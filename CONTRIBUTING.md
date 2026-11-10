@@ -29,7 +29,6 @@ python -m pip install -e ".[dev]"
 ```bash
 python -m unittest discover -s tests -v
 ruff check .
-ruff format --check .
 ```
 
 ## Pull request checklist
