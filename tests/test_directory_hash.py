@@ -23,7 +23,8 @@ class DirectoryHashTests(unittest.TestCase):
             excluded.mkdir()
             (excluded / "artifact").write_text("x", encoding="utf-8")
             (root / "keep").write_text("y", encoding="utf-8")
-            self.assertEqual(list(directory_hashes(root, exclude_dirs=("build",))), ["keep"])
+            actual = list(directory_hashes(root, exclude_dirs=("build",)))
+            self.assertEqual(actual, ["keep"])
 
     def test_empty_directory(self):
         with tempfile.TemporaryDirectory() as directory:
