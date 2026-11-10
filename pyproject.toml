@@ -1,0 +1,10 @@
+[project]
+name = "python-dev-utils"
+version = "0.1.0"
+description = "Small, dependency-free Python utilities for developers"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+
+[tool.setuptools]
+packages = ["dev_utils"]
