@@ -2,7 +2,9 @@ import hashlib
 import tempfile
 import unittest
 from pathlib import Path
+
 from dev_utils.checksum import hash_bytes, hash_file, sha256_file
+
 
 class ChecksumTests(unittest.TestCase):
     def test_sha256_file(self):
@@ -48,12 +50,28 @@ class ChecksumTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unsupported hash algorithm"):
             hash_bytes(b"hello", "not-a-real-algorithm")
 
-    def test_invalid_chunk_size(self):
+    def test_invalid_file_algorithm(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "data"
             path.write_bytes(b"x")
-            with self.assertRaises(ValueError):
-                hash_file(path, chunk_size=0)
+            with self.assertRaisesRegex(ValueError, "unsupported hash algorithm"):
+                hash_file(path, algorithm="not-a-real-algorithm")
+
+    def test_invalid_chunk_sizes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "data"
+            path.write_bytes(b"x")
+            for value in (0, -1, True, 1.5, "10"):
+                with self.subTest(chunk_size=value):
+                    with self.assertRaises(ValueError):
+                        hash_file(path, chunk_size=value)
+
+    def test_sha256_compatibility_helper(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "data"
+            path.write_bytes(b"compatibility")
+            self.assertEqual(sha256_file(path), hash_file(path, "sha256"))
+
 
 if __name__ == "__main__":
     unittest.main()
