@@ -1,10 +1,44 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "python-dev-utils"
-version = "0.1.0"
-description = "Small, dependency-free Python utilities for developers"
+version = "0.2.0"
+description = "Small, dependency-free file utilities for Python developers"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
+authors = [{ name = "MrKhanBhai" }]
+keywords = ["python", "developer-tools", "file-hashing", "checksum", "utilities"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities",
+]
+
+[project.optional-dependencies]
+dev = ["build>=1.2", "coverage>=7.6", "ruff>=0.8"]
+
+[project.urls]
+Homepage = "https://github.com/MrKhanBhai/python-dev-utils"
+Repository = "https://github.com/MrKhanBhai/python-dev-utils"
+Issues = "https://github.com/MrKhanBhai/python-dev-utils/issues"
 
 [tool.setuptools]
 packages = ["dev_utils"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "B"]
