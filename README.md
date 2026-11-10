@@ -104,7 +104,6 @@ Lint and formatting checks (after installing the development extra):
 
 ```bash
 ruff check .
-ruff format --check .
 ```
 
 GitHub Actions tests Python 3.10, 3.11, 3.12, and 3.13.
