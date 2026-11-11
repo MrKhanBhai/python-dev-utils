@@ -28,6 +28,9 @@ classifiers = [
 [project.optional-dependencies]
 dev = ["build>=1.2", "coverage>=7.6", "ruff>=0.8"]
 
+[project.scripts]
+dev-utils = "dev_utils.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/MrKhanBhai/python-dev-utils"
 Repository = "https://github.com/MrKhanBhai/python-dev-utils"
@@ -35,6 +38,9 @@ Issues = "https://github.com/MrKhanBhai/python-dev-utils/issues"
 
 [tool.setuptools]
 packages = ["dev_utils"]
+
+[tool.setuptools.package-data]
+dev_utils = ["py.typed"]
 
 [tool.ruff]
 line-length = 88

@@ -1,24 +1,41 @@
 """Deterministic directory hashing helpers."""
 from __future__ import annotations
+
 import os
 from pathlib import Path
-from .checksum import PathLike, hash_file
 
-def directory_hashes(directory: PathLike, algorithm: str = "sha256",
-                     exclude_dirs: tuple[str, ...] = ()) -> dict[str, str]:
+from .checksum import PathLike, _new_hash, hash_file
+
+
+def directory_hashes(
+    directory: PathLike,
+    algorithm: str = "sha256",
+    exclude_dirs: tuple[str, ...] = (),
+) -> dict[str, str]:
     """Return a sorted relative-path-to-digest mapping for regular files.
 
     Paths use POSIX separators. Symbolic links are not followed. Excluded
     directory names are skipped at every depth. This does not combine files
-    into a single directory digest.
+    into a single directory digest. The algorithm is validated even when the
+    directory contains no files.
     """
     root = Path(directory)
     if not root.is_dir():
         raise NotADirectoryError(str(root))
+
+    # Validate eagerly so an empty directory cannot hide a bad algorithm.
+    _new_hash(algorithm)
+
+    if isinstance(exclude_dirs, str) or not all(
+        isinstance(name, str) for name in exclude_dirs
+    ):
+        raise TypeError("exclude_dirs must be an iterable of directory names")
+
     result: dict[str, str] = {}
     for current, dirs, names in os.walk(root, followlinks=False):
         dirs[:] = sorted(
-            name for name in dirs
+            name
+            for name in dirs
             if name not in exclude_dirs
             and not (Path(current) / name).is_symlink()
         )

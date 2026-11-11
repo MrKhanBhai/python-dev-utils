@@ -29,6 +29,8 @@ python -m pip install -e ".[dev]"
 ```bash
 python -m unittest discover -s tests -v
 ruff check .
+dev-utils --help
+python -m build
 ```
 
 ## Pull request checklist
@@ -36,7 +38,7 @@ ruff check .
 - [ ] The change solves one clearly described problem.
 - [ ] Tests cover the new or changed behavior.
 - [ ] Documentation and examples are updated where needed.
-- [ ] All local checks pass.
+- [ ] Unit tests, lint, CLI smoke test, and package build pass locally where available.
 - [ ] No secrets, generated artifacts, or unrelated formatting changes are included.
 
 Please describe what changed, why it is useful, and how it was tested. If a check could not be run, say so clearly.
