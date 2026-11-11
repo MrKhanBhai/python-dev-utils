@@ -11,18 +11,30 @@ from .directory_hash import directory_hashes
 MANIFEST_VERSION = 1
 
 
+def _validate_excluded_dirs(excluded_dirs: Any) -> list[str]:
+    if not isinstance(excluded_dirs, list) or any(
+        not isinstance(name, str) or not name for name in excluded_dirs
+    ):
+        raise ValueError("manifest excluded_dirs must be a list of non-empty strings")
+    if len(set(excluded_dirs)) != len(excluded_dirs):
+        raise ValueError("manifest excluded_dirs must not contain duplicates")
+    return excluded_dirs
+
+
 def build_manifest(
     directory: PathLike,
     algorithm: str = "sha256",
     exclude_dirs: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Build a versioned, deterministic manifest of files below a directory."""
+    excluded = list(exclude_dirs)
     files = directory_hashes(
-        directory, algorithm=algorithm, exclude_dirs=exclude_dirs
+        directory, algorithm=algorithm, exclude_dirs=tuple(excluded)
     )
     return {
         "manifest_version": MANIFEST_VERSION,
         "algorithm": algorithm,
+        "exclude_dirs": excluded,
         "files": files,
     }
 
@@ -49,6 +61,8 @@ def _validate_manifest_data(data: dict[str, Any]) -> None:
     if not isinstance(algorithm, str):
         raise ValueError("manifest algorithm must be a string")
     digest_size = _new_hash(algorithm).digest_size * 2
+    excluded_dirs = data.get("exclude_dirs", [])
+    _validate_excluded_dirs(excluded_dirs)
     files = data.get("files")
     if not isinstance(files, dict):
         raise ValueError("manifest files must be a JSON object")
@@ -56,7 +70,13 @@ def _validate_manifest_data(data: dict[str, Any]) -> None:
         if not isinstance(relative, str) or not isinstance(digest, str):
             raise ValueError("manifest paths and digests must be strings")
         path = PurePosixPath(relative)
-        if not relative or path.is_absolute() or ".." in path.parts or "\\" in relative:
+        if (
+            not relative
+            or relative in {".", ".."}
+            or path.is_absolute()
+            or ".." in path.parts
+            or "\\" in relative
+        ):
             raise ValueError(f"unsafe manifest path: {relative!r}")
         if len(digest) != digest_size:
             raise ValueError(f"invalid digest length for {relative!r}")
@@ -74,6 +94,7 @@ def load_manifest(manifest_path: PathLike) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("manifest must be a JSON object")
     _validate_manifest_data(data)
+    data.setdefault("exclude_dirs", [])
     return data
 
 
@@ -98,7 +119,11 @@ def verify_manifest(
     root = Path(directory)
     if not root.is_dir():
         raise NotADirectoryError(str(root))
-    actual = directory_hashes(root, algorithm=expected["algorithm"])
+    actual = directory_hashes(
+        root,
+        algorithm=expected["algorithm"],
+        exclude_dirs=tuple(expected.get("exclude_dirs", [])),
+    )
     expected_files = expected["files"]
     missing = sorted(set(expected_files) - set(actual))
     common = set(expected_files) & set(actual)
