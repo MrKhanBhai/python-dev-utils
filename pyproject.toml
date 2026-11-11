@@ -3,8 +3,8 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "python-dev-utils"
-version = "0.3.0"
+name = "mrkhanbhai-python-dev-utils"
+version = "0.3.1"
 description = "Small, dependency-free file utilities for Python developers"
 readme = "README.md"
 requires-python = ">=3.10"

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- Rename the PyPI distribution to `mrkhanbhai-python-dev-utils` because `python-dev-utils` is registered to another publisher.
+- Add a GitHub Actions Trusted Publishing workflow using PyPI OIDC; no long-lived PyPI API token is stored in GitHub.
+
 Notable changes to python-dev-utils are documented here.
 
 ## 0.3.0
