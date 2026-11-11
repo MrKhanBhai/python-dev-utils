@@ -27,7 +27,13 @@ def build_manifest(
     exclude_dirs: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Build a versioned, deterministic manifest of files below a directory."""
+    if isinstance(exclude_dirs, str) or not all(
+        isinstance(name, str) and name for name in exclude_dirs
+    ):
+        raise ValueError("exclude_dirs must contain non-empty directory names")
     excluded = list(exclude_dirs)
+    if len(set(excluded)) != len(excluded):
+        raise ValueError("exclude_dirs must not contain duplicate names")
     files = directory_hashes(
         directory, algorithm=algorithm, exclude_dirs=tuple(excluded)
     )
