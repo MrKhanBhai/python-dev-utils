@@ -33,16 +33,47 @@ class ManifestTests(unittest.TestCase):
                 manifest_path.read_text(encoding="utf-8").endswith("\n")
             )
 
+    def test_excluded_directories_are_preserved_during_verification(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "data"
+            (root / "cache").mkdir(parents=True)
+            (root / "cache" / "generated.bin").write_bytes(b"cache")
+            (root / "keep.txt").write_text("keep", encoding="utf-8")
+            manifest = build_manifest(root, exclude_dirs=("cache",))
+            result = verify_manifest(root, manifest)
+            self.assertEqual(result, {
+                "missing": [],
+                "modified": [],
+                "untracked": [],
+            })
+            self.assertEqual(manifest["exclude_dirs"], ["cache"])
+
+    def test_write_load_and_verify_preserves_exclusions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "data"
+            (root / ".cache").mkdir(parents=True)
+            (root / ".cache" / "tmp").touch()
+            manifest_path = Path(directory) / "manifest.json"
+            write_manifest(root, manifest_path, exclude_dirs=(".cache",))
+            loaded = load_manifest(manifest_path)
+            self.assertEqual(loaded["exclude_dirs"], [".cache"])
+            self.assertFalse(any(verify_manifest(root, loaded).values()))
+
+    def test_legacy_manifest_without_exclusions_remains_supported(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "data"
+            root.mkdir()
+            (root / "file.txt").write_text("data", encoding="utf-8")
+            manifest = build_manifest(root)
+            manifest.pop("exclude_dirs")
+            self.assertFalse(any(verify_manifest(root, manifest).values()))
+
     def test_verify_clean_directory(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "data"
             root.mkdir()
             (root / "hello.txt").write_text("hello", encoding="utf-8")
-            expected = {
-                "missing": [],
-                "modified": [],
-                "untracked": [],
-            }
+            expected = {"missing": [], "modified": [], "untracked": []}
             self.assertEqual(verify_manifest(root, build_manifest(root)), expected)
 
     def test_verify_reports_all_change_types(self):
@@ -68,9 +99,7 @@ class ManifestTests(unittest.TestCase):
             root.mkdir()
             manifest = build_manifest(root)
             (root / "extra").touch()
-            result = verify_manifest(
-                root, manifest, include_untracked=False
-            )
+            result = verify_manifest(root, manifest, include_untracked=False)
             self.assertEqual(result["untracked"], [])
 
     def test_rejects_unsupported_version(self):
@@ -107,6 +136,19 @@ class ManifestTests(unittest.TestCase):
             }
             path.write_text(json.dumps(data), encoding="utf-8")
             with self.assertRaises(ValueError):
+                load_manifest(path)
+
+    def test_rejects_invalid_excluded_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.json"
+            data = {
+                "manifest_version": 1,
+                "algorithm": "sha256",
+                "exclude_dirs": ["cache", 3],
+                "files": {},
+            }
+            path.write_text(json.dumps(data), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "exclude_dirs"):
                 load_manifest(path)
 
 
