@@ -2,6 +2,14 @@
 
 Notable changes to python-dev-utils are documented here.
 
+## 0.3.0
+
+- Add the `dev-utils` CLI for hashing, file comparison, duplicate discovery, and directory manifest operations.
+- Add versioned JSON directory manifests with loading, validation, and verification reports for missing, modified, and untracked files.
+- Preserve excluded directory settings when verifying manifests and improve input validation for hash algorithms and directory exclusions.
+- Add PEP 561 typing metadata and expand CI across Python 3.10–3.13 on Ubuntu, Windows, and macOS.
+- Expand regression coverage and documentation for the new APIs and CLI.
+
 ## 0.2.0
 
 - Add generic streaming file hashing and bytes hashing.
