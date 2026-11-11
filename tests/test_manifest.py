@@ -148,7 +148,7 @@ class ManifestTests(unittest.TestCase):
                 "files": {},
             }
             path.write_text(json.dumps(data), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "exclude_dirs"):
+            with self.assertRaisesRegex(ValueError, "excluded_dirs"):
                 load_manifest(path)
 
 
