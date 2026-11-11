@@ -50,6 +50,12 @@ class ChecksumTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unsupported hash algorithm"):
             hash_bytes(b"hello", "not-a-real-algorithm")
 
+    def test_rejects_variable_length_hash_algorithms(self):
+        for algorithm in ("shake_128", "shake_256"):
+            with self.subTest(algorithm=algorithm):
+                with self.assertRaisesRegex(ValueError, "variable-length"):
+                    hash_bytes(b"hello", algorithm)
+
     def test_invalid_file_algorithm(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "data"
