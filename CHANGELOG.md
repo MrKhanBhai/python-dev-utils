@@ -14,7 +14,8 @@ Notable changes to python-dev-utils are documented here.
 
 ## Unreleased
 
-- Harden hash algorithm and directory input validation.
+- Harden hash algorithm and directory input validation; reject variable-length SHAKE algorithms with a clear error.
+- Preserve excluded directory names in manifests so verification uses the same scan scope.
 - Add versioned JSON directory manifests with validation and verification reports.
 - Add the `dev-utils` CLI for hashing, comparison, duplicate discovery, and manifests.
 - Add PEP 561 typing metadata and expand cross-platform CI to Ubuntu, Windows, and macOS.
