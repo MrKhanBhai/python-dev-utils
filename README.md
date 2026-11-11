@@ -9,7 +9,7 @@ Small, dependency-free file utilities for Python developers.
 
 ## Features
 
-- Stream file contents into a hash using any algorithm supported by `hashlib`.
+- Stream file contents into a hash using fixed-length algorithms supported by `hashlib` (for example SHA-256 and SHA-512). Variable-length SHAKE algorithms are not supported.
 - Hash in-memory `bytes` without creating a temporary file.
 - Compare two files byte-for-byte without reading either file fully into memory.
 - Find duplicate files by size and content hash (read-only; never deletes files).
@@ -81,7 +81,7 @@ else:
     print("Directory matches the manifest")
 ```
 
-A verification result contains sorted `missing`, `modified`, and `untracked` relative paths. Verification never changes files. The manifest stores per-file digests; it is not a single combined directory digest. Symbolic links are not followed.
+A verification result contains sorted `missing`, `modified`, and `untracked` relative paths. Verification uses the same excluded directory names recorded in the manifest, so excluded folders are not reported as untracked. Verification never changes files. The manifest stores per-file digests; it is not a single combined directory digest. Symbolic links are not followed.
 
 ## Command-line interface
 
@@ -120,7 +120,7 @@ dev-utils verify ./data ../data-manifest.json
 | `load_manifest(manifest_path)` | Load and validate a JSON manifest |
 | `verify_manifest(directory, manifest, include_untracked=True)` | Report missing, modified, and untracked files |
 
-File-system errors are generally propagated to the caller. Unsupported algorithms and non-positive chunk sizes raise `ValueError`.
+File-system errors are generally propagated to the caller. Unsupported algorithms (including variable-length SHAKE algorithms) and non-positive chunk sizes raise `ValueError`.
 
 ## Development
 
