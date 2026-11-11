@@ -18,7 +18,15 @@ Small, dependency-free file utilities for Python developers.
 
 ## Installation
 
-Install the current project directly from GitHub:
+Install the published distribution from PyPI (after its first upload):
+
+```bash
+python -m pip install mrkhanbhai-python-dev-utils
+```
+
+The import package remains `dev_utils`, and the command-line entry point remains `dev-utils`.
+
+You can also install the source directly from GitHub:
 
 ```bash
 python -m pip install "git+https://github.com/MrKhanBhai/python-dev-utils.git"
@@ -38,7 +46,7 @@ For development (including test, build, and lint tools), run this from the repos
 python -m pip install -e ".[dev]"
 ```
 
-> **PyPI note:** The normalized project name `python-dev-utils` is already registered to a different publisher. Confirm the exact PyPI project URL/name before using a PyPI install command; do not assume this repository owns that listing.
+> **PyPI distribution name:** `mrkhanbhai-python-dev-utils`. The legacy normalized name `python-dev-utils` belongs to a different publisher.
 
 ## Quick start
 
