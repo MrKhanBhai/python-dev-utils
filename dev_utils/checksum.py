@@ -17,15 +17,20 @@ def _validate_chunk_size(chunk_size: int) -> None:
 
 
 def _new_hash(algorithm: str) -> "hashlib._Hash":
-    """Create a hashlib digest with a consistent public-facing error."""
+    """Create a fixed-length hashlib digest with a consistent public error."""
     try:
-        return hashlib.new(algorithm)
+        digest = hashlib.new(algorithm)
     except (TypeError, ValueError) as exc:
         raise ValueError(f"unsupported hash algorithm: {algorithm!r}") from exc
+    if digest.digest_size == 0:
+        raise ValueError(
+            f"variable-length hash algorithm is not supported: {algorithm!r}"
+        )
+    return digest
 
 
 def hash_bytes(data: bytes, algorithm: str = "sha256") -> str:
-    """Return the hexadecimal digest of bytes using a hashlib algorithm."""
+    """Return the hexadecimal digest of bytes using a fixed-length hashlib algorithm."""
     if not isinstance(data, bytes):
         raise TypeError("data must be bytes")
     digest = _new_hash(algorithm)
