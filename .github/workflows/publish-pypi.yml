@@ -41,6 +41,9 @@ jobs:
     name: Publish to PyPI with Trusted Publishing
     needs: build
     runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mrkhanbhai-python-dev-utils
     permissions:
       id-token: write
     steps:
